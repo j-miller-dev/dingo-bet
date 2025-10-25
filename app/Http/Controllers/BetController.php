@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Bet;
 use App\Models\Event;
+use App\Models\Odds;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -16,8 +17,8 @@ class BetController extends Controller
     {
         $user = $request->user();
 
-        // Get user's bets with event and sport info
-        $bets = Bet::with(['event.sport'])
+        // Get user's bets with event, sport, and odds info
+        $bets = Bet::with(['event.sport', 'odds.market'])
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -47,12 +48,13 @@ class BetController extends Controller
     {
         $validated = $request->validate([
             'event_id' => 'required|exists:events,id',
-            'selection' => 'required|in:home,away,draw',
+            'odds_id' => 'required|exists:odds,id',
             'stake' => 'required|numeric|min:1|max:10000',
         ]);
 
         $user = $request->user();
         $event = Event::findOrFail($validated['event_id']);
+        $odds = Odds::with('market')->findOrFail($validated['odds_id']);
 
         // Validation 1: Check if event allows betting
         if (!$event->canBet()) {
@@ -61,7 +63,14 @@ class BetController extends Controller
             ]);
         }
 
-        // Validation 2: Check if user has sufficient funds
+        // Validation 2: Check if odds belong to this event's market
+        if ($odds->market->event_id !== $event->id) {
+            return back()->withErrors([
+                'bet' => 'Invalid odds selection for this event.',
+            ]);
+        }
+
+        // Validation 3: Check if user has sufficient funds
         $wallet = $user->wallet;
         if (!$wallet || $wallet->balance < $validated['stake']) {
             return back()->withErrors([
@@ -81,17 +90,18 @@ class BetController extends Controller
             ]);
         }
 
-        // Create the bet
-        // For Phase 3, we use simple 2x payout if won (we'll add real odds in Phase 4)
-        $potentialPayout = $validated['stake'] * 2;
+        // Calculate payout based on odds
+        $potentialPayout = $odds->calculatePayout($validated['stake']);
 
+        // Create the bet
         $bet = Bet::create([
             'user_id' => $user->id,
             'event_id' => $event->id,
-            'selection' => $validated['selection'],
+            'odds_id' => $odds->id,
             'stake' => $validated['stake'],
+            'odds_value' => $odds->value, // Store odds value at time of bet
             'status' => 'pending',
-            'payout' => $potentialPayout, // Store potential payout
+            'payout' => $potentialPayout,
         ]);
 
         return redirect()

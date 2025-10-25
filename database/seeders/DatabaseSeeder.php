@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
         // Seed sports and events
         $this->call([
             SportsAndEventsSeeder::class,
+            MarketsAndOddsSeeder::class,
         ]);
     }
 }

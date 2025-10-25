@@ -18,8 +18,10 @@ class Bet extends Model
     protected $fillable = [
         'user_id',
         'event_id',
+        'odds_id',
         'stake',
         'selection',
+        'odds_value',
         'status',
         'payout',
     ];
@@ -31,6 +33,7 @@ class Bet extends Model
      */
     protected $casts = [
         'stake' => 'decimal:2',
+        'odds_value' => 'decimal:2',
         'payout' => 'decimal:2',
     ];
 
@@ -48,6 +51,14 @@ class Bet extends Model
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);
+    }
+
+    /**
+     * Get the odds for this bet.
+     */
+    public function odds(): BelongsTo
+    {
+        return $this->belongsTo(Odds::class);
     }
 
     /**

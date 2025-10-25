@@ -49,7 +49,9 @@ class EventController extends Controller
      */
     public function show(Request $request, Event $event)
     {
-        $event->load('sport');
+        $event->load(['sport', 'markets.odds' => function ($query) {
+            $query->where('active', true);
+        }]);
 
         $user = $request->user();
         $wallet = $user->wallet;

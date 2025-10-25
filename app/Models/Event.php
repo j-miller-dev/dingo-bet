@@ -51,6 +51,14 @@ class Event extends Model
     }
 
     /**
+     * Get all markets for this event.
+     */
+    public function markets(): HasMany
+    {
+        return $this->hasMany(Market::class);
+    }
+
+    /**
      * Check if event has started.
      */
     public function hasStarted(): bool

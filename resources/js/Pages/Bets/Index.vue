@@ -11,6 +11,19 @@ interface Sport {
     icon: string;
 }
 
+interface Market {
+    id: number;
+    name: string;
+    type: string;
+}
+
+interface Odds {
+    id: number;
+    name: string;
+    value: string;
+    market: Market;
+}
+
 interface Event {
     id: number;
     home_team: string;
@@ -24,10 +37,12 @@ interface Bet {
     id: number;
     stake: string;
     selection: string;
+    odds_value: string;
     status: string;
     payout: string;
     created_at: string;
     event: Event;
+    odds?: Odds;
     selected_team?: string;
 }
 
@@ -76,12 +91,21 @@ const formatCurrency = (amount: string) => {
 };
 
 const getSelectionLabel = (bet: Bet) => {
+    // If bet has odds (Phase 4+), use that
+    if (bet.odds) {
+        return bet.odds.name;
+    }
+    // Fallback for old bets from Phase 3
     if (bet.selection === 'home') {
         return bet.event.home_team;
     } else if (bet.selection === 'away') {
         return bet.event.away_team;
     }
     return 'Draw';
+};
+
+const getMarketName = (bet: Bet) => {
+    return bet.odds?.market.name || 'Match Winner';
 };
 
 const getStatusColor = (status: string) => {
@@ -189,20 +213,27 @@ const profitColor = profit >= 0 ? 'text-green-600' : 'text-red-600';
                                 </span>
                             </div>
 
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 rounded-lg p-4">
-                                <div>
-                                    <div class="text-xs text-gray-600 mb-1">Your Pick</div>
-                                    <div class="font-medium">{{ getSelectionLabel(bet) }}</div>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <div class="text-xs text-gray-600 mb-2">{{ getMarketName(bet) }}</div>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div>
+                                        <div class="text-xs text-gray-600 mb-1">Your Pick</div>
+                                        <div class="font-medium">{{ getSelectionLabel(bet) }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-gray-600 mb-1">Odds</div>
+                                        <div class="font-medium">{{ bet.odds_value ? parseFloat(bet.odds_value).toFixed(2) : '2.00' }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-gray-600 mb-1">Stake</div>
+                                        <div class="font-medium">{{ formatCurrency(bet.stake) }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-gray-600 mb-1">Potential Payout</div>
+                                        <div class="font-medium text-green-600">{{ formatCurrency(bet.payout) }}</div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div class="text-xs text-gray-600 mb-1">Stake</div>
-                                    <div class="font-medium">{{ formatCurrency(bet.stake) }}</div>
-                                </div>
-                                <div>
-                                    <div class="text-xs text-gray-600 mb-1">Potential Payout</div>
-                                    <div class="font-medium text-green-600">{{ formatCurrency(bet.payout) }}</div>
-                                </div>
-                                <div class="flex items-end">
+                                <div class="mt-3 flex justify-end">
                                     <button
                                         @click="cancelBet(bet.id)"
                                         :disabled="cancelForm.processing"
@@ -260,27 +291,36 @@ const profitColor = profit >= 0 ? 'text-green-600' : 'text-red-600';
                                 </span>
                             </div>
 
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 rounded-lg p-4">
-                                <div>
-                                    <div class="text-xs text-gray-600 mb-1">Your Pick</div>
-                                    <div class="font-medium">{{ getSelectionLabel(bet) }}</div>
-                                </div>
-                                <div>
-                                    <div class="text-xs text-gray-600 mb-1">Stake</div>
-                                    <div class="font-medium">{{ formatCurrency(bet.stake) }}</div>
-                                </div>
-                                <div>
-                                    <div class="text-xs text-gray-600 mb-1">
-                                        {{ bet.status === 'won' ? 'Payout' : 'Potential Payout' }}
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <div class="text-xs text-gray-600 mb-2">{{ getMarketName(bet) }}</div>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div>
+                                        <div class="text-xs text-gray-600 mb-1">Your Pick</div>
+                                        <div class="font-medium">{{ getSelectionLabel(bet) }}</div>
                                     </div>
-                                    <div :class="['font-medium', bet.status === 'won' ? 'text-green-600' : 'text-gray-600']">
-                                        {{ formatCurrency(bet.payout) }}
+                                    <div>
+                                        <div class="text-xs text-gray-600 mb-1">Odds</div>
+                                        <div class="font-medium">{{ bet.odds_value ? parseFloat(bet.odds_value).toFixed(2) : '2.00' }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-gray-600 mb-1">Stake</div>
+                                        <div class="font-medium">{{ formatCurrency(bet.stake) }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-gray-600 mb-1">
+                                            {{ bet.status === 'won' ? 'Payout' : 'Potential Payout' }}
+                                        </div>
+                                        <div :class="['font-medium', bet.status === 'won' ? 'text-green-600' : 'text-gray-600']">
+                                            {{ formatCurrency(bet.payout) }}
+                                        </div>
                                     </div>
                                 </div>
-                                <div>
-                                    <div class="text-xs text-gray-600 mb-1">Result</div>
-                                    <div :class="['font-semibold', bet.status === 'won' ? 'text-green-600' : 'text-red-600']">
-                                        {{ bet.status === 'won' ? '+' : '-' }}{{ formatCurrency(bet.status === 'won' ? parseFloat(bet.payout) - parseFloat(bet.stake) : bet.stake) }}
+                                <div class="border-t border-gray-200 mt-3 pt-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">Result</span>
+                                        <span :class="['font-semibold text-lg', bet.status === 'won' ? 'text-green-600' : bet.status === 'lost' ? 'text-red-600' : 'text-gray-600']">
+                                            {{ bet.status === 'won' ? '+' : bet.status === 'lost' ? '-' : '' }}{{ formatCurrency(bet.status === 'won' ? parseFloat(bet.payout) - parseFloat(bet.stake) : bet.stake) }}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
