@@ -14,7 +14,7 @@ interface Event {
     sport: Sport;
     home_team: string;
     away_team: string;
-    start_time: string;
+    starts_at: string;
     status: string;
     result: string | null;
     pending_bets_count: number;
@@ -132,7 +132,7 @@ const getResultLabel = (result: string | null) => {
                                         {{ event.home_team }} vs {{ event.away_team }}
                                     </h4>
                                     <p class="text-sm text-gray-600">
-                                        {{ formatDateTime(event.start_time) }}
+                                        {{ formatDateTime(event.starts_at) }}
                                     </p>
                                 </div>
                                 <div class="text-right">
@@ -214,7 +214,7 @@ const getResultLabel = (result: string | null) => {
                                         {{ event.home_team }} vs {{ event.away_team }}
                                     </h4>
                                     <p class="text-sm text-gray-600">
-                                        {{ formatDateTime(event.start_time) }}
+                                        {{ formatDateTime(event.starts_at) }}
                                     </p>
                                 </div>
                                 <div class="text-right">
