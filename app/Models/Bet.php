@@ -49,4 +49,65 @@ class Bet extends Model
     {
         return $this->belongsTo(Event::class);
     }
+
+    /**
+     * Check if bet is still pending.
+     */
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    /**
+     * Check if bet was won.
+     */
+    public function isWon(): bool
+    {
+        return $this->status === 'won';
+    }
+
+    /**
+     * Check if bet was lost.
+     */
+    public function isLost(): bool
+    {
+        return $this->status === 'lost';
+    }
+
+    /**
+     * Get the selected team name.
+     */
+    public function getSelectedTeamAttribute(): string
+    {
+        if ($this->selection === 'home') {
+            return $this->event->home_team;
+        } elseif ($this->selection === 'away') {
+            return $this->event->away_team;
+        }
+        return 'Draw';
+    }
+
+    /**
+     * Scope for pending bets.
+     */
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
+
+    /**
+     * Scope for settled bets (won or lost).
+     */
+    public function scopeSettled($query)
+    {
+        return $query->whereIn('status', ['won', 'lost']);
+    }
+
+    /**
+     * Scope for user's bets.
+     */
+    public function scopeForUser($query, $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
 }

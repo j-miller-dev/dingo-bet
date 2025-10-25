@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BetController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WalletController;
@@ -32,6 +33,11 @@ Route::middleware('auth')->group(function () {
     // Event routes
     Route::get('/events', [EventController::class, 'index'])->name('events.index');
     Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
+
+    // Bet routes
+    Route::get('/bets', [BetController::class, 'index'])->name('bets.index');
+    Route::post('/bets', [BetController::class, 'store'])->name('bets.store');
+    Route::post('/bets/{bet}/cancel', [BetController::class, 'cancel'])->name('bets.cancel');
 });
 
 require __DIR__.'/auth.php';

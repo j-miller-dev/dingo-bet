@@ -46,6 +46,12 @@ const showingNavigationDropdown = ref(false);
                                     Events
                                 </NavLink>
                                 <NavLink
+                                    :href="route('bets.index')"
+                                    :active="route().current('bets.*')"
+                                >
+                                    My Bets
+                                </NavLink>
+                                <NavLink
                                     :href="route('wallet.index')"
                                     :active="route().current('wallet.index')"
                                 >
@@ -163,6 +169,12 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('events.*')"
                         >
                             Events
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('bets.index')"
+                            :active="route().current('bets.*')"
+                        >
+                            My Bets
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             :href="route('wallet.index')"

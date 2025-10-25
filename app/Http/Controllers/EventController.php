@@ -47,12 +47,16 @@ class EventController extends Controller
     /**
      * Display a specific event.
      */
-    public function show(Event $event)
+    public function show(Request $request, Event $event)
     {
         $event->load('sport');
 
+        $user = $request->user();
+        $wallet = $user->wallet;
+
         return Inertia::render('Events/Show', [
             'event' => $event,
+            'wallet' => $wallet,
         ]);
     }
 }
