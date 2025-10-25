@@ -3,6 +3,7 @@
 use App\Http\Controllers\BetController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SettlementController;
 use App\Http\Controllers\WalletController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +39,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/bets', [BetController::class, 'index'])->name('bets.index');
     Route::post('/bets', [BetController::class, 'store'])->name('bets.store');
     Route::post('/bets/{bet}/cancel', [BetController::class, 'cancel'])->name('bets.cancel');
+
+    // Settlement routes (in production, add admin middleware here)
+    Route::get('/settlement', [SettlementController::class, 'index'])->name('settlement.index');
+    Route::post('/settlement/{event}/settle', [SettlementController::class, 'settle'])->name('settlement.settle');
+    Route::post('/settlement/{event}/void', [SettlementController::class, 'void'])->name('settlement.void');
 });
 
 require __DIR__.'/auth.php';

@@ -57,6 +57,12 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Wallet
                                 </NavLink>
+                                <NavLink
+                                    :href="route('settlement.index')"
+                                    :active="route().current('settlement.*')"
+                                >
+                                    Settlement
+                                </NavLink>
                             </div>
                         </div>
 
@@ -181,6 +187,12 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('wallet.index')"
                         >
                             Wallet
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('settlement.index')"
+                            :active="route().current('settlement.*')"
+                        >
+                            Settlement
                         </ResponsiveNavLink>
                     </div>
 
