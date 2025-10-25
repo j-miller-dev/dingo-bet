@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WalletController;
 use Illuminate\Foundation\Application;
@@ -27,6 +28,10 @@ Route::middleware('auth')->group(function () {
     // Wallet routes
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
     Route::post('/wallet/add-play-money', [WalletController::class, 'addPlayMoney'])->name('wallet.add-play-money');
+
+    // Event routes
+    Route::get('/events', [EventController::class, 'index'])->name('events.index');
+    Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
 });
 
 require __DIR__.'/auth.php';

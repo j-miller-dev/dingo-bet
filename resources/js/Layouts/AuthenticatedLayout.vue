@@ -40,6 +40,12 @@ const showingNavigationDropdown = ref(false);
                                     Dashboard
                                 </NavLink>
                                 <NavLink
+                                    :href="route('events.index')"
+                                    :active="route().current('events.*')"
+                                >
+                                    Events
+                                </NavLink>
+                                <NavLink
                                     :href="route('wallet.index')"
                                     :active="route().current('wallet.index')"
                                 >
@@ -151,6 +157,12 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('dashboard')"
                         >
                             Dashboard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('events.index')"
+                            :active="route().current('events.*')"
+                        >
+                            Events
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             :href="route('wallet.index')"
