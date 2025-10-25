@@ -44,22 +44,24 @@ class SportsAndEventsSeeder extends Seeder
         ]);
 
         // Create Football Events (NFL)
+        // Past events that need settlement
         Event::create([
             'sport_id' => $football->id,
             'home_team' => 'New England Patriots',
             'away_team' => 'Kansas City Chiefs',
-            'starts_at' => Carbon::now()->addDays(2)->setTime(20, 0),
-            'status' => 'upcoming',
+            'starts_at' => Carbon::now()->subHours(3),
+            'status' => 'live',
         ]);
 
         Event::create([
             'sport_id' => $football->id,
             'home_team' => 'Dallas Cowboys',
             'away_team' => 'Green Bay Packers',
-            'starts_at' => Carbon::now()->addDays(3)->setTime(13, 0),
-            'status' => 'upcoming',
+            'starts_at' => Carbon::now()->subDays(1)->setTime(13, 0),
+            'status' => 'live',
         ]);
 
+        // Future events
         Event::create([
             'sport_id' => $football->id,
             'home_team' => 'San Francisco 49ers',
@@ -69,14 +71,16 @@ class SportsAndEventsSeeder extends Seeder
         ]);
 
         // Create Basketball Events (NBA)
+        // Past event that needs settlement
         Event::create([
             'sport_id' => $basketball->id,
             'home_team' => 'Los Angeles Lakers',
             'away_team' => 'Boston Celtics',
-            'starts_at' => Carbon::now()->addDays(1)->setTime(19, 30),
-            'status' => 'upcoming',
+            'starts_at' => Carbon::now()->subHours(5),
+            'status' => 'live',
         ]);
 
+        // Future events
         Event::create([
             'sport_id' => $basketball->id,
             'home_team' => 'Golden State Warriors',
@@ -94,14 +98,16 @@ class SportsAndEventsSeeder extends Seeder
         ]);
 
         // Create Soccer Events (Premier League)
+        // Past event that needs settlement
         Event::create([
             'sport_id' => $soccer->id,
             'home_team' => 'Arsenal',
             'away_team' => 'Chelsea',
-            'starts_at' => Carbon::now()->addDays(1)->setTime(15, 0),
-            'status' => 'upcoming',
+            'starts_at' => Carbon::now()->subHours(2),
+            'status' => 'live',
         ]);
 
+        // Future events
         Event::create([
             'sport_id' => $soccer->id,
             'home_team' => 'Manchester United',
