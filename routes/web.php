@@ -44,6 +44,25 @@ Route::middleware('auth')->group(function () {
     Route::get('/settlement', [SettlementController::class, 'index'])->name('settlement.index');
     Route::post('/settlement/{event}/settle', [SettlementController::class, 'settle'])->name('settlement.settle');
     Route::post('/settlement/{event}/void', [SettlementController::class, 'void'])->name('settlement.void');
+
+    // Debug route - check events in database
+    Route::get('/debug/events', function () {
+        $events = \App\Models\Event::with('sport')->get();
+        return response()->json([
+            'total_events' => $events->count(),
+            'now' => now()->toDateTimeString(),
+            'events' => $events->map(function($event) {
+                return [
+                    'id' => $event->id,
+                    'sport' => $event->sport->name,
+                    'matchup' => $event->home_team . ' vs ' . $event->away_team,
+                    'starts_at' => $event->starts_at,
+                    'status' => $event->status,
+                    'is_past' => $event->starts_at < now(),
+                ];
+            })
+        ]);
+    });
 });
 
 require __DIR__.'/auth.php';
