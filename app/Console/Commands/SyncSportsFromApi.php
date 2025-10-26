@@ -30,7 +30,7 @@ class SyncSportsFromApi extends Command
             return 1;
         }
 
-        $this->info("Found {count($apiSports)} sports in API");
+        $this->info("Found " . count($apiSports) . " sports in API");
 
         $synced = 0;
         $skipped = 0;
