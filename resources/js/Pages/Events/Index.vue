@@ -47,18 +47,44 @@ const formatDate = (dateString: string) => {
     });
 };
 
-const groupedEvents = computed(() => {
-    const groups: Record<string, Event[]> = {};
+const eventsByDate = computed(() => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+
+    const groups: Record<string, Event[]> = {
+        'Today': [],
+        'Tomorrow': [],
+        'This Week': [],
+        'Later': [],
+    };
 
     props.events.forEach((event) => {
-        const sportName = event.sport.name;
-        if (!groups[sportName]) {
-            groups[sportName] = [];
+        const eventDate = new Date(event.starts_at);
+        const eventDay = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+
+        if (eventDay.getTime() === today.getTime()) {
+            groups['Today'].push(event);
+        } else if (eventDay.getTime() === tomorrow.getTime()) {
+            groups['Tomorrow'].push(event);
+        } else if (eventDate < nextWeek) {
+            groups['This Week'].push(event);
+        } else {
+            groups['Later'].push(event);
         }
-        groups[sportName].push(event);
     });
 
-    return groups;
+    // Filter out empty groups
+    return Object.fromEntries(
+        Object.entries(groups).filter(([_, events]) => events.length > 0)
+    );
+});
+
+const topCategories = computed(() => {
+    return props.sportGroups.slice(0, 6); // Show top 6 categories
 });
 
 const filterByGroup = (groupName: string) => {
@@ -79,19 +105,41 @@ const clearFilters = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">Upcoming Events</h2>
-                <button
-                    @click="showGroups = !showGroups"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                >
-                    {{ showGroups ? 'Hide Filters' : 'Browse Sports' }}
-                </button>
-            </div>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Upcoming Events</h2>
         </template>
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <!-- Quick Category Navigation -->
+                <div class="mb-6 bg-white rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-semibold text-gray-900">Quick Filters</h3>
+                        <button
+                            @click="showGroups = !showGroups"
+                            class="text-sm text-blue-600 hover:text-blue-800"
+                        >
+                            {{ showGroups ? 'Hide All Sports' : 'View All Sports' }}
+                        </button>
+                    </div>
+
+                    <!-- Top Categories -->
+                    <div class="flex flex-wrap gap-2 mb-2">
+                        <button
+                            v-for="group in topCategories"
+                            :key="group.name"
+                            @click="filterByGroup(group.name)"
+                            :class="[
+                                'px-4 py-2 rounded-lg font-medium transition text-sm',
+                                selectedGroup === group.name
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200',
+                            ]"
+                        >
+                            {{ group.name }} ({{ group.total_events }})
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Sport Groups Browser -->
                 <div v-if="showGroups" class="mb-6 bg-white rounded-lg shadow p-6">
                     <h3 class="text-lg font-semibold mb-4">Browse by Sport Category</h3>
@@ -152,45 +200,49 @@ const clearFilters = () => {
                     </p>
                 </div>
 
-                <!-- Events List -->
-                <div v-if="events.length > 0" class="space-y-6">
-                    <div v-for="(sportEvents, sportName) in groupedEvents" :key="sportName">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                            <span class="text-2xl">{{ sportEvents[0].sport.icon }}</span>
-                            {{ sportName }}
-                            <span class="text-sm font-normal text-gray-500">({{ sportEvents.length }})</span>
-                        </h3>
+                <!-- Events List Grouped by Date -->
+                <div v-if="events.length > 0" class="space-y-8">
+                    <div v-for="(dateEvents, dateLabel) in eventsByDate" :key="dateLabel">
+                        <!-- Date Header -->
+                        <div class="mb-4">
+                            <h2 class="text-2xl font-bold text-gray-900">{{ dateLabel }}</h2>
+                            <p class="text-sm text-gray-500">{{ dateEvents.length }} events</p>
+                        </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Events Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <Link
-                                v-for="event in sportEvents"
+                                v-for="event in dateEvents"
                                 :key="event.id"
                                 :href="route('events.show', event.id)"
-                                class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition"
+                                class="bg-white rounded-lg shadow p-5 hover:shadow-lg transition group"
                             >
-                                <div class="flex justify-between items-start mb-4">
-                                    <div class="flex-1">
-                                        <div class="font-semibold text-lg text-gray-900">
-                                            {{ event.home_team }}
-                                        </div>
-                                        <div class="text-gray-600 my-1">vs</div>
-                                        <div class="font-semibold text-lg text-gray-900">
-                                            {{ event.away_team }}
-                                        </div>
+                                <!-- Sport Badge -->
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span class="text-xl">{{ event.sport.icon }}</span>
+                                    <span class="text-xs font-medium text-gray-500">{{ event.sport.name }}</span>
+                                </div>
+
+                                <!-- Teams -->
+                                <div class="mb-3">
+                                    <div class="font-semibold text-base text-gray-900">
+                                        {{ event.home_team }}
                                     </div>
-                                    <div class="text-right">
-                                        <div class="text-sm text-gray-600">
-                                            {{ formatDate(event.starts_at) }}
-                                        </div>
-                                        <span class="mt-2 inline-block px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            {{ event.status }}
-                                        </span>
+                                    <div class="text-gray-500 text-sm my-1">vs</div>
+                                    <div class="font-semibold text-base text-gray-900">
+                                        {{ event.away_team }}
                                     </div>
                                 </div>
 
-                                <div class="mt-4 pt-4 border-t border-gray-200">
-                                    <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                        View Odds & Place Bet →
+                                <!-- Time -->
+                                <div class="text-sm text-gray-600 mb-3">
+                                    {{ formatDate(event.starts_at) }}
+                                </div>
+
+                                <!-- Action -->
+                                <div class="pt-3 border-t border-gray-200">
+                                    <button class="text-blue-600 group-hover:text-blue-800 text-sm font-medium">
+                                        View Odds →
                                     </button>
                                 </div>
                             </Link>
