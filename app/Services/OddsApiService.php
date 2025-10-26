@@ -58,7 +58,7 @@ class OddsApiService
     {
         $cacheKey = "odds_api_{$sportKey}_{$region}_{$market}";
 
-        return Cache::remember($cacheKey, now()->addHours($this->cacheHours), function () use ($sportKey, $region, $market) {
+        return Cache::remember($cacheKey, now()->addHours($this->cacheHours), function () use ($sportKey, $region, $market, $cacheKey) {
             try {
                 $response = Http::get("{$this->baseUrl}/sports/{$sportKey}/odds", [
                     'apiKey' => $this->apiKey,
@@ -146,7 +146,7 @@ class OddsApiService
             'Football' => 'americanfootball_nfl',
             'Basketball' => 'basketball_nba',
             'Soccer' => 'soccer_epl', // English Premier League
-            'Tennis' => 'tennis_atp', // ATP Tour
+            'Tennis' => null, // Tennis not consistently available, skip for now
         ];
 
         return $mapping[$ourSportName] ?? null;
