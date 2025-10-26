@@ -58,10 +58,11 @@ const showingNavigationDropdown = ref(false);
                                     Wallet
                                 </NavLink>
                                 <NavLink
-                                    :href="route('settlement.index')"
-                                    :active="route().current('settlement.*')"
+                                    v-if="$page.props.auth.user.is_admin"
+                                    :href="route('admin.dashboard')"
+                                    :active="route().current('admin.*')"
                                 >
-                                    Settlement
+                                    Admin
                                 </NavLink>
                             </div>
                         </div>
@@ -189,10 +190,11 @@ const showingNavigationDropdown = ref(false);
                             Wallet
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
-                            :href="route('settlement.index')"
-                            :active="route().current('settlement.*')"
+                            v-if="$page.props.auth.user.is_admin"
+                            :href="route('admin.dashboard')"
+                            :active="route().current('admin.*')"
                         >
-                            Settlement
+                            Admin
                         </ResponsiveNavLink>
                     </div>
 

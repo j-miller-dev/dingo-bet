@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\BetController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\ProfileController;
@@ -40,10 +41,17 @@ Route::middleware('auth')->group(function () {
     Route::post('/bets', [BetController::class, 'store'])->name('bets.store');
     Route::post('/bets/{bet}/cancel', [BetController::class, 'cancel'])->name('bets.cancel');
 
-    // Settlement routes (in production, add admin middleware here)
-    Route::get('/settlement', [SettlementController::class, 'index'])->name('settlement.index');
-    Route::post('/settlement/{event}/settle', [SettlementController::class, 'settle'])->name('settlement.settle');
-    Route::post('/settlement/{event}/void', [SettlementController::class, 'void'])->name('settlement.void');
+    // Admin routes
+    Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/users', [AdminDashboardController::class, 'users'])->name('users');
+        Route::post('/users/{user}/toggle-admin', [AdminDashboardController::class, 'toggleAdmin'])->name('users.toggle-admin');
+
+        // Settlement routes (admin only)
+        Route::get('/settlement', [SettlementController::class, 'index'])->name('settlement');
+        Route::post('/settlement/{event}/settle', [SettlementController::class, 'settle'])->name('settlement.settle');
+        Route::post('/settlement/{event}/void', [SettlementController::class, 'void'])->name('settlement.void');
+    });
 });
 
 require __DIR__.'/auth.php';
